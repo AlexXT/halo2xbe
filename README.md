@@ -1,29 +1,43 @@
 # halo2xbe — the Halo 2 May 2003 Xbox builds, recompiled and named
 
-The Xbox side of project 2. The PC side (the tools in
-`F:\Games\Halo 2 Beta\tools`) is in `F:\Games\Halo 2 Beta\recomp\h2tools`;
-the notes for both live there.
+The Xbox side of project 2. The PC side (the `blam.exe` / `sapien.exe` tools
+from the same 2003 build) is a separate project: an XBE is not a PE, so the
+Xbox builds use an XBE recompiler and the PC tools need a PE one.
 
-An XBE is not a PE, so this uses **xboxrecomp**, not pcrecomp. The toolbox is
-the `hk21x` fork of `TGP482/XboxXBERecomp`, at
-`D:\mygame\XboxXBE-Recomp-fork`.
+The aim here is the *pstencil* module — the "spicy" stencil shadow volumes
+Bungie cut before retail. The beta debug build still carries all of it, so
+recompiling it makes the algorithm static C that can actually be read.
+
+The toolbox is the
+[hk21x fork of TGP482/XboxXBERecomp](https://github.com/AlexXT/XboxXBERecomp),
+forked here with the Halo 2 fixes on top (upstream:
+[TGP482/XboxXBERecomp](https://github.com/TGP482/XboxXBERecomp)).
 
 ---
 
 ## What is here
 
+Committed:
+
 ```
-assets/
-  halo2debug.xbe      the game's debug build  (5.1 MB) -- the full pstencil engine
-  halo2tagdebug.xbe   the Xbox tag library     (6.3 MB) -- the same, plus the shader class
 config/
   game.toml           the recompiler's input for halo2debug.xbe
+  game_hand.toml      the hand-maintained config that includes it
   tag.toml            ... and for halo2tagdebug.xbe
+src/
+  common/game_info.cpp
+  game/hooks.cpp
+tools/                the project's own tools (see below)
+docs/, scripts/, launcher/, .github/
+```
+
+Produced locally and gitignored:
+
+```
+assets/               the two XBEs and the game's data folders — supply your own
 generated/
   game/               33,756 functions lifted, 117 files
   tag/                36,414 functions lifted, 133 files
-pstencil_named.cpp    the 178 named pstencil functions, gathered for reading
-tools/                the project's own tools (see below)
 out/build/release/    Game.exe, the running recompiled game
 ```
 
@@ -36,9 +50,11 @@ build.bat            configure, lift both XBEs, build Game.exe
 build.bat clean      the same, with the CMake cache removed first
 ```
 
-The game needs its XBE and its data folders beside the exe. This machine has
-`maps/` but not `core/`, `TDATA/` or `UDATA/`, so it starts, opens a window
-and shows black: the recomp works, the content is missing.
+`CMakeLists.txt` takes `SDK` (the path to your checkout of the patched fork)
+and the optional local dependency-cache paths as CMake cache variables.
+
+The game needs its XBE and its data folders beside the exe. Without the data
+it opens a window and shows black: the recomp works, the content is missing.
 
 `logs/halo2.log` is the runtime's own log — it names the XBE, the D3D12
 adapter, the render thread, and every error.
@@ -89,21 +105,18 @@ Checked against the code's own assertions:
 
 Six for six.
 
-### The three changes to the fork
+### What the fork carries
 
-The fork has no way to name a function — upstream has a `[names]` section the
-fork does not carry. Three small changes:
+The patched fork has an upstream `[names]` feature the original `hk21x` fork
+did not carry, plus two things ported from an older working tree:
 
 * `tools/recomp/analysis.h` — `Config::named_functions`
 * `tools/recomp/main.cpp` — read a `[names]` table from the config
 * `tools/recomp/codegen.cpp` — `FuncName` consults it before falling back
   to `sub_%08X`
-
-And two more, from the old working tree, ported on:
-
 * the `xbdm.dll` host (the Xbox debug connection)
 * the **XDK 5455 signatures** — the XDK build the Halo 2 beta is, which
-  neither the fork nor upstream ships
+  neither the original fork nor upstream ships
 
 ---
 
