@@ -1,0 +1,84 @@
+# The hand kept entries for halo2debug.xbe.
+#
+# config/game.toml is the scan output: xbe_symbols writes it and rewrites it on
+# every build, so it is never edited. This file includes it and adds what the scan
+# could not find, which is read after the file it includes, so an entry here wins
+# over the scan's.
+includes = ["game.toml"]
+
+# The XDK's own functions the scan could not place, from the linker map (the XDK's
+# libraries are the D3D, D3DX, DSOUND, XNET, XONLINE and XPP sections of the image).
+#
+# The XAPI XPP gamepad device type record. 0x3D080C was the *debug keyboard*
+# table (XDEVICE_TYPE_DEBUG_KEYBOARD_TABLE); the gamepad table is 0x3D055C,
+# which input_update_gamepads passes to XGetDeviceChanges and XInputOpen.
+#
+# The two vtable pointers of the DirectSound stream object: the guest's own
+# CDirectSoundStream destructor writes them (`mov dword ptr [esi], 0x460D44` and
+# `mov dword ptr [esi+4], 0x460D38`), so the object the host makes looks the way
+# the guest's own does.
+[symbols]
+CDevice_KickOff = 0x33DF10
+CDirectSoundStream_AddRef = 0x36DE0B
+CDirectSoundStream_Discontinuity = 0x36DF07
+CDirectSoundStream_Flush = 0x36DF54
+CDirectSoundStream_FlushEx = 0x36E111
+CDirectSoundStream_GetInfo = 0x36DEA0
+CDirectSoundStream_GetStatus = 0x36DF9F
+CDirectSoundStream_Pause = 0x36E067
+CDirectSoundStream_Process = 0x36DFF0
+CDirectSoundStream_Release = 0x36DE52
+CDirectSoundStream_SetDopplerFactor = 0x370BC9
+CDirectSoundStream_SetFilter = 0x36EAFF
+CDirectSoundStream_SetFormat = 0x3716D7
+CDirectSoundStream_SetFrequency = 0x370728
+CDirectSoundStream_SetHeadroom = 0x36EB51
+CDirectSoundStream_SetI3DL2Source = 0x370CD7
+CDirectSoundStream_SetMaxDistance = 0x37098F
+CDirectSoundStream_SetMinDistance = 0x3709E9
+CDirectSoundStream_SetMixBinVolumes = 0x36EBA3
+CDirectSoundStream_SetMixBins = 0x3707CC
+CDirectSoundStream_SetMode = 0x370A43
+CDirectSoundStream_SetPosition = 0x370A99
+CDirectSoundStream_SetRolloffCurve = 0x370C7D
+CDirectSoundStream_SetVelocity = 0x370B04
+CDirectSoundStream_SetVolume = 0x36EA09
+D3DDevice_GetBackBuffer = 0x34CD40
+D3DDevice_GetDepthStencilSurface = 0x368974
+D3D_BlockOnNonSurfaceResource = 0x33EB40
+D3D_BlockOnResource = 0x33E870
+D3D_BlockOnTime = 0x33E130
+D3D_KickOffAndWaitForIdle = 0x33E850
+D3D_MakeRequestedSpace = 0x33E400
+D3D_SetFence = 0x33E080
+DSound_StreamVtable = 0x460D44
+DSound_StreamVtable2 = 0x460D38
+XPP_GamepadType = 0x3D055C
+# The debug build's assertion path (the linker map: cseries.obj and
+# cseries_windows.obj): XBE_SKIP_ASSERTS=1 logs a check and carries on instead of
+# stopping the title, which is what the release build does.
+display_assert = 0x1DB50
+system_exit = 0x1D070
+# Developer console bridge (F1 -> Console page)
+console_update_hook = 0x47590
+console_process_command = 0x46EC0
+console_open = 0x46D30
+
+
+# Extra entry points: an address the guest calls through a pointer, so no scan
+# finds it.
+#
+#   0x310389 = ""
+#
+# A [[function]] entry splits a function at an address: "end" is where the
+# decode of the function at "at" stops (exclusive).
+#
+#   [[function]]
+#   at = 0x31035F
+#   end = 0x310389
+#
+# A [names] entry gives the generated code the game's own name for a function,
+# so the code reads as the engine's source rather than as addresses:
+#
+#   [names]
+#   shadow_strip_builder = 0x2F80A

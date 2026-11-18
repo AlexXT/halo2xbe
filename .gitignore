@@ -1,0 +1,46 @@
+# build
+/out/
+/build/
+*.zip
+*.pdb
+*.exe
+*.obj
+*.o
+
+# recompiled code, derived from the game
+/generated/
+
+# user's own game files
+/assets/
+
+# runtime files
+settings.toml
+/logs/
+/hdd/
+/CrashDumps/
+
+# editors
+.vs/
+.vscode/
+.idea/
+
+# Local temporary folder
+.local
+
+# harness frame captures (game imagery)
+/captures/
+/screenshots/
+
+# local run logs and cached pipeline state
+*.log
+run.*.txt
+*.bin
+
+# shell redirect leftovers in this working tree
+*:
+
+# Python bytecode and scratch analysis output
+__pycache__/
+*.pyc
+work_*.txt
+pstencil_named.cpp
